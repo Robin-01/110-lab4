@@ -55,12 +55,58 @@ export class ResultsScreenController extends ScreenController {
 		this.gameOverSound.currentTime = 0;
 	}
 
+
+	// ------ Async for Task #6 ---- //
+
+	//Async method for showResults
+	async showResultsFromServer(finalScore: number): Promise<void> {
+		try {
+			this.model.setFinalScore(finalScore);
+			this.view.updateFinalScore(finalScore);
+
+		// Load and update leaderboard
+		const entries = await this.loadLeaderboardFromServer();	//changed to await
+		entries.push({
+			score: finalScore,
+			timestamp: new Date().toLocaleString(),
+		});
+		entries.sort((a, b) => b.score - a.score); // Sort descending
+		const top5 = entries.slice(0, MAX_LEADERBOARD_ENTRIES); // Keep top 5
+		await this.saveLeaderboardToServer(top5);
+		this.model.setLeaderboard(top5);
+		this.view.updateLeaderboard(top5);
+
+		this.view.show();
+
+		// TODO: Task 4 - Play the game over sound
+		this.gameOverSound.play();
+		this.gameOverSound.currentTime = 0;
+		} catch (error) {
+			console.error("Error showing results from server:", error);
+		}
+		
+	}
+
 	/**
 	 * Load leaderboard from localStorage
 	 */
 	private loadLeaderboard(): LeaderboardEntry[] {
 		// TODO: Task 5 - Load leaderboard from localStorage
-		return []; // Placeholder
+		const data = localStorage.getItem(LEADERBOARD_KEY);
+		if (data === null) {
+			return [];
+		}
+		return JSON.parse(data) as LeaderboardEntry[];
+	}
+
+	// ------- Task #6 ------- //
+
+	async loadLeaderboardFromServer(): Promise<LeaderboardEntry[]> {
+		const response = await fetch("/api/leaderboard");
+		if (!response.ok) {
+			throw new Error("Unable to load leaderboard");
+		}
+		return await response.json() as LeaderboardEntry[];
 	}
 
 	/**
@@ -68,6 +114,20 @@ export class ResultsScreenController extends ScreenController {
 	 */
 	private saveLeaderboard(entries: LeaderboardEntry[]): void {
 		// TODO: Task 5 - Save leaderboard to localStorage
+		localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries));
+	}
+
+	async saveLeaderboardToServer(entries: LeaderboardEntry[]): Promise<void> {
+		const response = await fetch("/api/leaderboard", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(entries),
+		});
+		if (!response.ok) {
+			throw new Error("Unable to save leaderboard");
+		}
 	}
 
 	/**

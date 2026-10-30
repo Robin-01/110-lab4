@@ -7,7 +7,7 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
  */
 export class GameScreenView implements View {
 	private group: Konva.Group;
-	private lemonImage: Konva.Image | Konva.Circle |"lemon.png" | null = null;
+	private lemonImage: Konva.Image | null = null;
 	private scoreText: Konva.Text;
 	private timerText: Konva.Text;
 
@@ -73,12 +73,22 @@ export class GameScreenView implements View {
 				offsetX: 50,
 				offsetY: 50,
 			});
+
+			// image.x(STAGE_WIDTH / 2);
+			// image.y(STAGE_HEIGHT / 2);
+			// image.width(100);
+			// image.height(100);
+
+			// image.offsetX(image.width() / 2);
+			// image.offsetY(image.height() / 2);
+
 			image.on("click", onLemonClick);
 
 			this.lemonImage = image;
 			this.group.add(this.lemonImage);
 
 		});
+
 	}
 
 	/**`
