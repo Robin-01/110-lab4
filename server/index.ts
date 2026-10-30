@@ -30,7 +30,7 @@ app.get("/api/leaderboard", (_req, res) => {
 
 app.post("/api/leaderboard", (req, res) => {
     saveLeaderboard(req.body);
-    res.json({ message: "Saved" });
+    res.json({ message: "Saved!" });
 });
 
 app.listen(3001, () => console.log("Server running on port 3001"));
